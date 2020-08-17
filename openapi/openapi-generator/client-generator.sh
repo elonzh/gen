@@ -69,6 +69,9 @@ kubeclient::generator::generate_client() {
 
     echo "--- Building docker image ${image_name}..."
     docker build "${SCRIPT_ROOT}"/../ -f "${SCRIPT_ROOT}/Dockerfile" -t "${image_name}" \
+        --build-arg HTTP_PROXY="${HTTP_PROXY}" \
+        --build-arg HTTPS_PROXY="${HTTPS_PROXY}" \
+        --build-arg GH_PROXY="${GH_PROXY}" \
         --build-arg OPENAPI_GENERATOR_USER_ORG="${OPENAPI_GENERATOR_USER_ORG}" \
         --build-arg OPENAPI_GENERATOR_COMMIT="${OPENAPI_GENERATOR_COMMIT}" \
         --build-arg GENERATION_XML_FILE="${CLIENT_LANGUAGE}.xml"
@@ -79,6 +82,9 @@ kubeclient::generator::generate_client() {
 
     echo "--- Running generator inside container..."
     docker run --security-opt="label=disable" -u $(id -u) \
+        -e HTTP_PROXY="${HTTP_PROXY}" \
+        -e HTTPS_PROXY="${HTTPS_PROXY}" \
+        -e GH_PROXY="${GH_PROXY}" \
         -e CLEANUP_DIRS="${CLEANUP_DIRS_STRING}" \
         -e KUBERNETES_BRANCH="${KUBERNETES_BRANCH}" \
         -e CLIENT_VERSION="${CLIENT_VERSION}" \

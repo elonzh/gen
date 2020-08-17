@@ -17,12 +17,23 @@ ARG OPENAPI_GENERATOR_COMMIT
 ARG GENERATION_XML_FILE
 ARG OPENAPI_GENERATOR_USER_ORG=OpenAPITools
 
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG GH_PROXY
+ENV HTTP_PROXY=${HTTP_PROXY} HTTPS_PROXY=${HTTPS_PROXY}
+RUN echo "HTTP_PROXY:" ${HTTP_PROXY} "HTTPS_PROXY:" ${HTTPS_PROXY} "GH_PROXY:" ${GH_PROXY}
+COPY openapi-generator/sources.list /etc/apt/sources.list
+COPY openapi-generator/pip.conf /etc/pip.conf
+COPY openapi-generator/.npmrc /root/.npmrc
+COPY openapi-generator/settings.xml /root/.m2/settings.xml
+
 # Install preprocessing script requirements
 RUN apt-get update && apt-get -y install git python-pip && pip install urllib3==1.24.2
 
 # Install Autorest
 RUN apt-get update && apt-get -qq -y install libunwind8 libicu57 libssl1.0 liblttng-ust0 libcurl3 libuuid1 libkrb5-3 zlib1g
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
+RUN sed -i 's#https://deb.nodesource.com/node_10.x#https://mirrors.tuna.tsinghua.edu.cn/nodesource/deb_10.x#' /etc/apt/sources.list.d/nodesource.list
 RUN apt-get update && apt-get -y install \
     nodejs \
     libunwind8-dev \
@@ -54,7 +65,7 @@ RUN chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg
 RUN chown root:root /etc/apt/sources.list.d/microsoft-prod.list
 
 RUN apt-get update
-RUN apt-get install -yy -q dotnet-hosting-2.0.8
+RUN apt-get install -yy -q --allow-unauthenticated dotnet-hosting-2.0.8
 
 
 # Copy required files
